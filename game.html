@@ -1,0 +1,147 @@
+<!doctype html> 
+<html lang="en"> 
+<head> 
+	<meta charset="UTF-8" />
+    <title>2D Football Game</title>
+	<script type="text/javascript" src="js/phaser.min.js"></script>
+    <script src="css/text.css"></script>
+    <script src="js/preload.js"></script>
+    <script src="js/update.js"></script>
+    <script src="js/addElement.js"></script>
+    <script src="js/collisionEngine.js"></script>
+    <script src="js/AIEngine.js"></script>
+    <script src="js/scoreGoal.js"></script>
+</head>
+<body>
+
+<script type="text/javascript">
+
+game = new Phaser.Game(800, 600, Phaser.AUTO, '', { preload: preload, create: create, update: update });
+
+var player;
+var platforms;
+var ball;
+var cursors;
+
+var lastUpdateTime = 0;
+var detectionInterval = 5;
+var timer;
+var rightUpperHit = 0;  // 0-no hit; 1 - hit
+var leftUpperHit = 0;
+var factor = 0.8;
+
+var playerHit = 0; // 1 - rightUpperHit; 2 - leftUpperHit
+var nplayerHit = 0;
+
+var playerHorizontalMargin = 2;
+var playerUpMargin = 6;
+var headFactor = 0.8;  // head seems round. promote precision
+
+
+var gameState = 0;
+var gameReady = 1;
+var gameStart = 2;
+var gameEnd = 3;
+
+var goalWidth = 32;
+var goalHeight = 150;
+var characterWidth = 32;
+var groundHeight = 32;
+
+var humanScore = 0;
+var AIScore = 0;
+
+var right = 1;
+var left = 2;
+var jump = 3;
+var stop = 0;
+
+var gravity = 800;
+var playerY = Math.pow(300, 2)/(2*800);
+
+var AIDirection = 0;  // 0 -- still 1 -- left 2 -- right 3 -- up
+var AIAction = 0;
+
+var text;
+var endText;
+var noGame = 0;
+
+preload();
+
+function create() {
+    //  We're going to be using physics, so enable the Arcade Physics system
+    game.physics.startSystem(Phaser.Physics.ARCADE);
+
+    // keyboard input listener
+    window.addEventListener('keydown', checkKeyPressed, false); 
+
+    addBackground();
+
+    tutorial();
+
+    gameState = gameReady;
+}
+
+
+// be called when gameStart
+function gameSet(){
+    if(noGame == 1)  game.world.remove(text);
+    else{
+        game.world.remove(endText);
+        game.world.remove(humanScoreText);
+        game.world.remove(AIScoreText);
+    }
+    score();
+    addHumanPlayer();
+    addAIPlayer();
+    addAIComponent();
+    addBall(game.world.width/2);
+    addControl();
+    // collision detection between player and ball
+    startInterval();
+    startMatch();  // start watch which side score
+}
+
+// when player score
+function gameSetAI(){
+    console.log("AI lose");
+    addHumanPlayer();
+    addAIPlayer();
+    addAIComponent();
+    addBall(game.world.width*2/3);
+    addControl();
+    startInterval();
+    startMatch();
+}
+
+function gameSetHuman(){
+    console.log("Human Lose");
+    addHumanPlayer();
+    addAIPlayer();
+    addAIComponent();
+    addBall(game.world.width/3);
+    addControl();
+    startInterval();
+    startMatch();
+}
+
+// press "space" button and then start game
+function checkKeyPressed(e){
+    noGame++;
+    if(e.keyCode == "32"){
+        gameState = gameStart;
+        gameSet();
+    }
+}
+
+function tutorial(){
+    tut = "Press 'space' to start the game\n\n Try best to kick the ball into opposite goal\n\n Use 'up', 'left', 'right' buttons to move your player\n\n who score 11 first will win the game";
+    style = { font: "22px Arial", fill: "#ff0044", align: "center" };
+    text = game.add.text(game.world.centerX, game.world.centerY*2/3, tut, style);
+    text.anchor.set(0.5);
+}
+
+</script>
+
+</body>
+</html>
